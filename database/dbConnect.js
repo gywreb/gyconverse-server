@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 class ConnectMongo {
+  constructor() {
+    this.gfs = null;
+  }
   static getConnection() {
     if (!mongoose.connection.readyState) {
       mongoose
@@ -13,6 +16,12 @@ class ConnectMongo {
         .then(() => console.log(`DB is connected`.blue))
         .catch((err) => console.log(`${err}`.red));
     }
+    const conn = mongoose.connection;
+    conn.once("open", () => {
+      this.gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+        bucketName: process.env.MONGODB_BUCKET,
+      });
+    });
   }
 }
 
