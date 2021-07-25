@@ -46,6 +46,11 @@ const UserSchema = new Schema(
           type: Boolean,
           default: false,
         },
+        singleRoom: {
+          type: Schema.Types.ObjectId,
+          ref: "Room",
+          default: null,
+        },
       },
     ],
     friendRequests: [
@@ -61,7 +66,7 @@ const UserSchema = new Schema(
       },
     ],
   },
-  { timestamps: true, id: true, toJSON: { virtuals: true } }
+  { timestamps: true, id: false, toJSON: { virtuals: true } }
 );
 
 UserSchema.pre("save", async function (next) {

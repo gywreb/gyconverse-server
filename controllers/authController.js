@@ -16,6 +16,13 @@ exports.register = asyncMiddleware(async (req, res, next) => {
   res.json(new SuccessResponse(201, { newUser }));
 });
 
+exports.getCurrent = asyncMiddleware(async (req, res, next) => {
+  const authUser = req.user._doc;
+  if (!authUser) return next(new ErrorResponse(401, "unauthorized"));
+  const userInfo = _.omit(authUser, "password", "_id", "__v");
+  res.json(new SuccessResponse(200, { userInfo }));
+});
+
 exports.login = asyncMiddleware(async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });

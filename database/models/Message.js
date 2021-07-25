@@ -25,7 +25,11 @@ const MessageSchema = new Schema(
       ref: "User",
       required: [true, "sender is required"],
     },
+    timestamps: {
+      type: Date,
+      required: [true, "timestamps is required"],
+    },
   },
-  { timestamps: true, id: true, toJSON: { virtuals: true } }
+  { timestamps: true, id: false, toJSON: { virtuals: true } }
 );
 module.exports = mongoose.model("Message", MessageSchema, "message");

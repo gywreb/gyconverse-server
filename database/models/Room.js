@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const RoomTypeEnum = ["single", "room"];
+const RoomTypeEnum = ["single", "group"];
 
 const RoomSchema = new Schema(
   {
@@ -17,6 +17,7 @@ const RoomSchema = new Schema(
     },
     lastMessage: {
       type: String,
+      default: null,
     },
     members: [
       {
@@ -25,8 +26,12 @@ const RoomSchema = new Schema(
         required: [true, "user is required"],
       },
     ],
+    roomAdmin: {
+      type: Schema.Types.ObjectId,
+      default: null,
+    },
   },
-  { timestamps: true, id: true, toJSON: { virtuals: true } }
+  { timestamps: true, id: false, toJSON: { virtuals: true } }
 );
 
 module.exports = mongoose.model("Room", RoomSchema, "room");

@@ -11,6 +11,8 @@ const app = express();
 const server = require("http").createServer(app);
 const auth = require("./routes/auth");
 const user = require("./routes/user");
+const room = require("./routes/room");
+const message = require("./routes/message");
 
 ConnectMongo.getConnection();
 
@@ -22,6 +24,8 @@ app.use(cookieParser());
 
 app.use("/gyconverse/api/auth", auth);
 app.use("/gyconverse/api/user", user);
+app.use("/gyconverse/api/room", room);
+app.use("/gyconverse/api/message", message);
 app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
