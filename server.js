@@ -12,7 +12,7 @@ const auth = require("./routes/auth");
 const user = require("./routes/user");
 const room = require("./routes/room");
 const message = require("./routes/message");
-const SocketIO = require("./socket/socket");
+const SocketIO = require("./socket/Socket");
 const Events = require("./socket/Events");
 
 ConnectMongo.getConnection();
