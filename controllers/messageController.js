@@ -11,7 +11,8 @@ exports.saveMessage = asyncMiddleware(async (req, res, next) => {
   const roomExist = await Room.findOne({ _id: room });
   if (!roomExist)
     return next(new ErrorResponse(404, "this conversation is not exist"));
-  if (sender !== authUser._id)
+  console.log(authUser._id);
+  if (!authUser._id.equals(sender))
     return next(new ErrorResponse(401, "unauthorized to send message"));
   if (!roomExist.members.includes(sender))
     return next(
@@ -37,6 +38,10 @@ exports.saveMessage = asyncMiddleware(async (req, res, next) => {
     });
   }
   const newMessage = await message.save();
+  await Room.updateOne(
+    { _id: newMessage.room },
+    { lastMessage: newMessage.content }
+  );
   res.json(new SuccessResponse(201, { newMessage }));
 });
 

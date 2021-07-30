@@ -9,7 +9,12 @@ exports.getRandomPeople = asyncMiddleware(async (req, res, next) => {
   const people = await User.find({ _id: { $nin: authUser._id } }).select(
     "-password"
   );
-  const randomPeople = shuffleArray(people);
+  const randomPeople = shuffleArray(people).filter((person) => {
+    if (authUser.friends.find((friend) => friend.id.equals(person._id))) {
+      return false;
+    }
+    return true;
+  });
   res.json(new SuccessResponse(200, { people: randomPeople }));
 });
 

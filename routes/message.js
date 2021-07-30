@@ -3,7 +3,7 @@ const jwtAuth = require("../middlewares/jwtAuth");
 const router = express.Router();
 const messageController = require("../controllers/messageController");
 
-router.post("/", jwtAuth, messageController.saveMessage);
-router.get("/history", jwtAuth, messageController.loadMessageHistory);
+router.post("/save", jwtAuth, messageController.saveMessage);
+router.get("/history/:roomId", jwtAuth, messageController.loadMessageHistory);
 
 module.exports = router;
