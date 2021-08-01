@@ -36,13 +36,11 @@ SocketIO.init(server);
 
 SocketIO.io.on(Events.connection, (socket) => {
   // debug
-  socket.singleRooms = [];
   socket.currentRoom = "";
   console.log(`${socket.id} is connected!`);
   // =====
   // when user login success
   socket.on(Events.login, (chatUser) => {
-    socket.singleRooms = chatUser.rooms;
     SocketIO.joinSocket(chatUser, socket);
     SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
     // debug ===
@@ -55,8 +53,10 @@ SocketIO.io.on(Events.connection, (socket) => {
     socket.join(roomId);
   });
   socket.on(Events.leaveRoom, () => {
-    socket.leave(socket.currentRoom);
-    socket.currentRoom = "";
+    if (socket.currentRoom.length) {
+      socket.leave(socket.currentRoom);
+      socket.currentRoom = "";
+    }
   });
   // disconnect
   socket.on(Events.disconnect, () => {
@@ -69,7 +69,7 @@ SocketIO.io.on(Events.connection, (socket) => {
   });
   // client send message to socket = broadcast receive & get realtime rooms info
   socket.on(Events.singleRoomChat, (message) => {
-    socket.singleRooms.map((room) => {
+    SocketIO.singleRooms.map((room) => {
       if (room._id === message.room) {
         room.lastMessage = message.content;
       }
@@ -77,7 +77,7 @@ SocketIO.io.on(Events.connection, (socket) => {
     socket.broadcast
       .to(socket.currentRoom)
       .emit(Events.receiveSingleChat, message);
-    SocketIO.io.emit(Events.singleRoomsInfo, socket.singleRooms);
+    SocketIO.io.emit(Events.singleRoomsInfo, SocketIO.singleRooms);
   });
 });
 
