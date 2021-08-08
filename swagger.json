@@ -141,7 +141,7 @@
       }
     },
     "/makeFriend/{userId}": {
-      "get": {
+      "post": {
         "tags": ["User"],
         "summary": "make freind by id with current auth user",
         "security": [{ "bearerAuth": [] }],
