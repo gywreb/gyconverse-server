@@ -1,0 +1,496 @@
+{
+  "openapi": "3.0.2",
+  "servers": [
+    {
+      "url": "http://localhost:{port}/gyconverse/api",
+      "description": "development server",
+      "variables": {
+        "port": { "default": "5000" }
+      }
+    },
+    {
+      "url": "http://139.180.196.41:8686/gyconverse/api",
+      "description": "production server"
+    }
+  ],
+  "info": {
+    "version": "1.7.3",
+    "title": "GyConverse",
+    "description": "Realtime interaction application"
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "User authentication"
+    },
+    {
+      "name": "User",
+      "description": "Operations about user"
+    },
+    {
+      "name": "Message",
+      "description": "Operations about message"
+    },
+    {
+      "name": "Room",
+      "description": "Operations about room"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "user registeration",
+        "security": [{ "basicAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              },
+              "examples": {
+                "user": {
+                  "value": {
+                    "username": "kaleid",
+                    "email": "gywreb@gmail.com",
+                    "password": "12345678"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "user login",
+        "security": [{ "basicAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              },
+              "examples": {
+                "test": {
+                  "value": {
+                    "email": "gywreb@gmail.com",
+                    "password": "meou1234"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/getCurrent": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "get current auth user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["User"],
+        "summary": "get random people",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/makeFriend/{userId}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "make freind by id with current auth user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "user ObjectId from mongodb",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/message/save": {
+      "post": {
+        "tags": ["Message"],
+        "summary": "save chat message",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Message"
+              },
+              "examples": {
+                "message": {
+                  "value": {
+                    "content": "test message from swagger",
+                    "type": "TEXT",
+                    "room": "put a room id here!",
+                    "sender": "put current auth user id here"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/message/history/{roomId}": {
+      "get": {
+        "tags": ["Message"],
+        "summary": "make freind by id with current auth user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "room ObjectId from mongodb",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/room/single": {
+      "post": {
+        "tags": ["Room"],
+        "summary": "create single room = 1vs1 chat",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Room"
+              },
+              "examples": {
+                "message": {
+                  "value": {
+                    "roomName": "swagger-test-room",
+                    "members": ["auth id here", "one of auth friends id here"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/room": {
+      "get": {
+        "tags": ["Room"],
+        "summary": "get rooms",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "OK": {
+        "description": "OK",
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "success": true,
+                "code": 200,
+                "data": {}
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "success": false,
+                "code": 404,
+                "message": ""
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "success": false,
+                "code": 400,
+                "message": {
+                  "errorField": ""
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "success": false,
+                "code": 401,
+                "message": ""
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "no permission to access",
+        "content": {
+          "application/json": {
+            "schema": {
+              "example": {
+                "success": false,
+                "code": 403,
+                "message": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "required": ["username", "email", "password"],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "dragingod-sama"
+          },
+          "email": {
+            "type": "string",
+            "uniqueItems": true,
+            "example": "admin@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 8
+          },
+          "gender": {
+            "type": "string",
+            "enum": ["male", "female"]
+          },
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          },
+          "birthday": {
+            "type": "string"
+          },
+          "friends": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "talked": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "singleRoom": {
+                  "$ref": "#/components/schemas/Room",
+                  "default": null
+                }
+              }
+            }
+          },
+          "friendRequests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "rooms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Room"
+            }
+          }
+        }
+      },
+      "Room": {
+        "type": "object",
+        "required": ["roomName", "type"],
+        "properties": {
+          "roomName": {
+            "type": "string",
+            "uniqueItems": true
+          },
+          "type": {
+            "type": "string",
+            "enum": ["single", "group"]
+          },
+          "lastMessage": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "roomAdmin": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "Message": {
+        "type": "object",
+        "required": ["content", "type", "room", "sender"],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["TEXT", "IMAGE", "FILE"]
+          },
+          "room": {
+            "$ref": "#/components/schemas/Room"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/User"
+          },
+          "timestamps": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}
