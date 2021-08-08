@@ -140,7 +140,7 @@
         }
       }
     },
-    "user/makeFriend/{userId}": {
+    "/user/makeFriend/{userId}": {
       "post": {
         "tags": ["User"],
         "summary": "make freind by id with current auth user",
