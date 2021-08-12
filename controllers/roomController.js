@@ -3,6 +3,7 @@ const User = require("../database/models/User");
 const asyncMiddleware = require("../middlewares/asyncMiddleware");
 const ErrorResponse = require("../models/ErrorResponse");
 const SuccessResponse = require("../models/SuccessResponse");
+const _ = require("lodash");
 
 exports.getRooms = asyncMiddleware(async (req, res, next) => {
   const rooms = await Room.find({});
@@ -59,10 +60,62 @@ exports.createSingleRoom = asyncMiddleware(async (req, res, next) => {
     }
   });
 
-  await dbUser.save();
-  await dbFriend.save();
+  const updatedAuthUser = await dbUser.save();
+  const updatedTargetUser = await dbFriend.save();
   await User.updateMany({ _id: members }, { $push: { rooms: newRoom._id } });
-  res.json(new SuccessResponse(201, { newRoom }));
+
+  const arrayOfFriendId = updatedAuthUser.friends.map((friend) => friend.id);
+  const friendsInfo = await User.find({ _id: arrayOfFriendId });
+
+  const arrayOfTargetFriendId = updatedTargetUser.friends.map(
+    (friend) => friend.id
+  );
+  const targetFriendsInfo = await User.find({ _id: arrayOfTargetFriendId });
+
+  const updatedAuthUserFriends = await Promise.all(
+    updatedAuthUser.friends.map(async (friend) => {
+      let thisInfo = friendsInfo.find((info) => info._id.equals(friend.id));
+      let thisRoom = await Room.findOne({ _id: friend.singleRoom });
+      if (thisInfo) {
+        return {
+          ...friend._doc,
+          ..._.pick(thisInfo._doc, "username", "avatar"),
+          lastMessage: thisRoom ? thisRoom.lastMessage : null,
+        };
+      }
+    })
+  );
+
+  const updatedTargetUserFriends = await Promise.all(
+    updatedTargetUser.friends.map(async (friend) => {
+      let thisInfo = targetFriendsInfo.find((info) =>
+        info._id.equals(friend.id)
+      );
+      let thisRoom = await Room.findOne({ _id: friend.singleRoom });
+      if (thisInfo) {
+        return {
+          ...friend._doc,
+          ..._.pick(thisInfo._doc, "username", "avatar"),
+          lastMessage: thisRoom ? thisRoom.lastMessage : null,
+        };
+      }
+    })
+  );
+
+  const updatedAuthInfo = _.omit(
+    { ...updatedAuthUser._doc, friends: [...updatedAuthUserFriends] },
+    "password",
+    "__v"
+  );
+  const updatedUserInfo = _.omit(
+    { ...updatedTargetUser._doc, friends: [...updatedTargetUserFriends] },
+    "password",
+    "__v"
+  );
+
+  res.json(
+    new SuccessResponse(201, { newRoom, updatedAuthInfo, updatedUserInfo })
+  );
 });
 
 exports.createGroupRoom = asyncMiddleware(async (req, res, next) => {

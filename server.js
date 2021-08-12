@@ -83,6 +83,39 @@ SocketIO.io.on(Events.connection, (socket) => {
       .emit(Events.receiveSingleChat, message);
     SocketIO.io.emit(Events.singleRoomsInfo, SocketIO.singleRooms);
   });
+  // sendFriendRequest
+  socket.on(Events.sendFriendRequest, (request) => {
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === request.receiveId
+    );
+    if (targetSocket)
+      socket
+        .to(targetSocket.socketId)
+        .emit(Events.receiveFriendRequest, request);
+  });
+  // acceptFriendRequest
+  socket.on(Events.acceptFriendRequest, (request) => {
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === request.receiveId
+    );
+    if (targetSocket) {
+      socket
+        .to(targetSocket.socketId)
+        .emit(Events.alertAcceptFriendRequest, request);
+    }
+    SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
+  });
+  //send single chat invite
+  socket.on(Events.sendChatInvite, (invite) => {
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === invite.receiveId
+    );
+    if (targetSocket) {
+      socket.to(targetSocket.socketId).emit(Events.receiveChatInvite, invite);
+    }
+    SocketIO.addSingleRoom(invite.newRoom);
+    SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
+  });
 });
 
 server.listen(port, () =>
