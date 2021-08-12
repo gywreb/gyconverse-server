@@ -26,7 +26,9 @@ class SocketIO {
     }
   }
 
-  static addSingleRoom() {}
+  static addSingleRoom(room) {
+    SocketIO.singleRooms.push(room);
+  }
 }
 
 module.exports = SocketIO;

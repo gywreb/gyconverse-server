@@ -30,6 +30,7 @@ exports.getCurrent = asyncMiddleware(async (req, res, next) => {
         return {
           ...friend._doc,
           ..._.pick(thisInfo._doc, "username", "avatar"),
+          lastMessage: thisRoom ? thisRoom.lastMessage : null,
         };
     })
   );

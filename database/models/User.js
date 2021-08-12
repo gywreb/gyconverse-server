@@ -55,6 +55,20 @@ const UserSchema = new Schema(
     ],
     friendRequests: [
       {
+        id: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+        username: {
+          type: String,
+        },
+        avatar: {
+          type: String,
+        },
+      },
+    ],
+    pendingRequests: [
+      {
         type: Schema.Types.ObjectId,
         ref: "User",
       },
