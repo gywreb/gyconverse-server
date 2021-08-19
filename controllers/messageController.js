@@ -19,7 +19,7 @@ exports.saveMessage = asyncMiddleware(async (req, res, next) => {
       new ErrorResponse(400, "you are not a member in this conversation")
     );
   let message;
-  if (type === "TEXT") {
+  if (type === "TEXT" || type === "VIDEO_CALL") {
     message = new Message({
       content,
       type,

@@ -4,6 +4,8 @@ class SocketIO {
   static io = null;
   static onlineUsers = [];
   static singleRooms = [];
+  static inCallingUsers = [];
+  static inVidCallUsers = [];
 
   static async init(server) {
     SocketIO.io = socketio(server, {
@@ -28,6 +30,20 @@ class SocketIO {
 
   static addSingleRoom(room) {
     SocketIO.singleRooms.push(room);
+  }
+
+  static addInCallingUser(user) {
+    let inCallingUserId = SocketIO.inCallingUsers.map((user) => user._id);
+    if (!inCallingUserId.includes(user._id)) {
+      SocketIO.inCallingUsers.push(user);
+    }
+  }
+
+  static addInVidCallUser(user) {
+    let inVidUserId = SocketIO.inVidCallUsers.map((user) => user._id);
+    if (!inVidUserId.includes(user._id)) {
+      SocketIO.inVidCallUsers.push(user);
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const MessageTypeEnum = ["TEXT", "IMAGE", "FILE"];
+const MessageTypeEnum = ["TEXT", "IMAGE", "FILE", "VIDEO_CALL"];
 
 const MessageSchema = new Schema(
   {

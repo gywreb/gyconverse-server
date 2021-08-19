@@ -41,6 +41,7 @@ SocketIO.init(server);
 SocketIO.io.on(Events.connection, (socket) => {
   // debug
   socket.currentRoom = "";
+
   console.log(`${socket.id} is connected!`);
   // =====
   // when user login success
@@ -68,8 +69,9 @@ SocketIO.io.on(Events.connection, (socket) => {
       (user) => user.socketId !== socket.id
     );
     console.log(`${socket.id} is disconnect`.red);
-    // console.log(SocketIO.onlineUsers);
     SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
+    SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
   });
   // client send message to socket = broadcast receive & get realtime rooms info
   socket.on(Events.singleRoomChat, (message) => {
@@ -115,6 +117,89 @@ SocketIO.io.on(Events.connection, (socket) => {
     }
     SocketIO.addSingleRoom(invite.newRoom);
     SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
+  });
+  // send & recevie video call
+  socket.on(Events.sendCall, (signal) => {
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.to._id
+    );
+    SocketIO.addInCallingUser(signal.to);
+    SocketIO.addInCallingUser(signal.from);
+    if (targetSocket) {
+      socket.to(targetSocket.socketId).emit(Events.receiveCall, signal);
+    }
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
+  });
+
+  // cancel call from initiator
+  socket.on(Events.cancelCall, (signal) => {
+    SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
+      (user) => user._id !== signal.to._id
+    );
+    SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
+      (user) => user._id !== signal.from._id
+    );
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.to._id
+    );
+    if (targetSocket) {
+      socket.to(targetSocket.socketId).emit(Events.cancelCallReceive, signal);
+    }
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
+  });
+
+  // accept & denied video call
+  socket.on(Events.answerCall, (signal) => {
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.toUser._id
+    );
+    SocketIO.addInVidCallUser(signal.toUser);
+    SocketIO.addInVidCallUser(signal.ansUser);
+    SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
+      (user) => user._id !== signal.toUser._id
+    );
+    SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
+      (user) => user._id !== signal.ansUser._id
+    );
+    if (targetSocket) {
+      socket.to(targetSocket.socketId).emit(Events.acceptCall, signal);
+    }
+    SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
+  });
+
+  socket.on(Events.denyCall, (signal) => {
+    SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
+      (user) => user._id !== signal.to._id
+    );
+    SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
+      (user) => user._id !== signal.from._id
+    );
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.from._id
+    );
+    if (targetSocket) {
+      socket.to(targetSocket.socketId).emit(Events.denyCallReceive, signal);
+    }
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
+  });
+
+  //leaveCall
+  socket.on(Events.leaveCall, (signal) => {
+    SocketIO.inVidCallUsers = SocketIO.inVidCallUsers.filter(
+      (user) => user._id !== signal.from._id
+    );
+    SocketIO.inVidCallUsers = SocketIO.inVidCallUsers.filter(
+      (user) => user._id !== signal.to._id
+    );
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.to._id
+    );
+    if (targetSocket) {
+      socket.to(targetSocket.socketId).emit(Events.leaveCallReceive, signal);
+    }
+    SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
   });
 });
 
