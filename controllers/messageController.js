@@ -27,10 +27,9 @@ exports.saveMessage = asyncMiddleware(async (req, res, next) => {
       sender,
       timestamps: moment(),
     });
-  } else {
-    // placeholder for other type
+  } else if (type === "IMAGE" || type === "FILE") {
     message = new Message({
-      content,
+      content: req.file ? req.file.filename : "",
       type,
       room,
       sender,

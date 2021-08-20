@@ -1,4 +1,4 @@
-const ConnectMongoDB = require("../database/dbConnect");
+const ConnectMongo = require("../database/dbConnect");
 const ErrorResponse = require("../models/ErrorResponse");
 
 const errorHandler = (err, req, res, next) => {
@@ -13,7 +13,7 @@ const errorHandler = (err, req, res, next) => {
       errors.message[error] = err.errors[error].message;
     }
     // delete file in bucket if validation failed
-    if (req.file) ConnectMongoDB.gfs.delete(req.file.id);
+    if (req.file) ConnectMongo.gfs.delete(req.file.id);
   }
 
   // mongodb duplicate key
@@ -22,7 +22,7 @@ const errorHandler = (err, req, res, next) => {
     for (let error_id in err.keyValue) {
       errors.message[error_id] = `${error_id} is already existed!`;
     }
-    if (req.file) ConnectMongoDB.gfs.delete(req.file.id);
+    if (req.file) ConnectMongo.gfs.delete(req.file.id);
   }
 
   // resource not found error

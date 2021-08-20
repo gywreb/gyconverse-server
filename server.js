@@ -1,4 +1,5 @@
 const express = require("express");
+const app = express();
 require("dotenv").config();
 require("colors");
 const cors = require("cors");
@@ -8,14 +9,14 @@ const swaggerDoc = require("./swagger.json");
 const swaggerUI = require("swagger-ui-express");
 const ConnectMongo = require("./database/dbConnect");
 const errorHandler = require("./middlewares/errorHandler");
-const app = express();
-const server = require("http").createServer(app);
 const auth = require("./routes/auth");
 const user = require("./routes/user");
 const room = require("./routes/room");
+const file = require("./routes/file");
 const message = require("./routes/message");
 const SocketIO = require("./socket/Socket");
 const Events = require("./socket/Events");
+const server = require("http").createServer(app);
 
 ConnectMongo.getConnection();
 
@@ -27,10 +28,13 @@ app.use(cookieParser());
 
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDoc));
 
-app.use("/gyconverse/api/auth", auth);
-app.use("/gyconverse/api/user", user);
-app.use("/gyconverse/api/room", room);
-app.use("/gyconverse/api/message", message);
+const API_PREFIX = "/gyconverse/api";
+
+app.use(`${API_PREFIX}/auth`, auth);
+app.use(`${API_PREFIX}/user`, user);
+app.use(`${API_PREFIX}/room`, room);
+app.use(`${API_PREFIX}/message`, message);
+app.use(`${API_PREFIX}/file`, file);
 app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
