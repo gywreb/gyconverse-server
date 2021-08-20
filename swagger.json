@@ -9,7 +9,7 @@
       }
     },
     {
-      "url": "http://139.180.196.41:8686/gyconverse/api",
+      "url": "https://gyconverse-server.xyz/gyconverse/api",
       "description": "production server"
     }
   ],
