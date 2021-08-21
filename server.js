@@ -77,6 +77,18 @@ SocketIO.io.on(Events.connection, (socket) => {
     SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
     SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
   });
+
+  // logout =/= disconnect
+  socket.on(Events.logout, (userInfo) => {
+    SocketIO.onlineUsers = SocketIO.onlineUsers.filter(
+      (user) => user._id !== userInfo._id
+    );
+    console.log(`${socket.id} is logout`.yellow);
+    SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
+    SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
+    SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
+  });
+
   // client send message to socket = broadcast receive & get realtime rooms info
   socket.on(Events.singleRoomChat, (message) => {
     SocketIO.singleRooms.map((room) => {

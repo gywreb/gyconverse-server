@@ -26,4 +26,5 @@ module.exports = {
   cancelCallReceive: "cancelCallReceive",
   getInCallingUsers: "getInCallingUsers",
   getInVidCallUsers: "getInVidCallUsers",
+  logout: "logout",
 };
