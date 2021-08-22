@@ -6,6 +6,65 @@ const bcrypt = require("bcryptjs");
 const _ = require("lodash");
 const Room = require("../database/models/Room");
 
+exports.editProfile = asyncMiddleware(async (req, res, next) => {
+  const authUser = req.user._doc;
+  const updateParams = req.body;
+  const user = await User.findOne({ _id: authUser._id });
+
+  if (updateParams.password) updateParams = _.omit(updateParams, "password");
+  if (updateParams.email) updateParams = _.omit(updateParams, "email");
+  if (updateParams.username === user.username)
+    return next(
+      new ErrorResponse(400, "new username must be different from old one")
+    );
+  if (req.file) user.avatar = req.file.filename;
+
+  for (let property in updateParams) {
+    user[property] = updateParams[property];
+  }
+
+  const updatedUser = await user.save();
+
+  const arrayOfFriendId = updatedUser.friends.map((friend) => friend.id);
+  const friendsInfo = await User.find({ _id: arrayOfFriendId });
+
+  const updatedAuthUserFriends = await Promise.all(
+    updatedUser.friends.map(async (friend) => {
+      let thisInfo = friendsInfo.find((info) => info._id.equals(friend.id));
+      let thisRoom = await Room.findOne({ _id: friend.singleRoom });
+      if (thisInfo) {
+        return {
+          ...friend._doc,
+          ..._.pick(thisInfo._doc, "username", "avatar"),
+          lastMessage: thisRoom ? thisRoom.lastMessage : null,
+        };
+      }
+    })
+  );
+
+  const updatedAuthUserRooms = await Promise.all(
+    updatedUser.rooms.map(async (room) => {
+      let roomInfo = await Room.findOne({ _id: room });
+      if (roomInfo)
+        return {
+          ...roomInfo._doc,
+        };
+    })
+  );
+
+  const userInfo = _.omit(
+    {
+      ...updatedUser._doc,
+      friends: [...updatedAuthUserFriends],
+      rooms: [...updatedAuthUserRooms],
+    },
+    "password",
+    "__v"
+  );
+
+  res.json(new SuccessResponse(200, { userInfo }));
+});
+
 exports.register = asyncMiddleware(async (req, res, next) => {
   const { username, email, password } = req.body;
   const user = new User({
