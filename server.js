@@ -72,6 +72,44 @@ SocketIO.io.on(Events.connection, (socket) => {
     SocketIO.onlineUsers = SocketIO.onlineUsers.filter(
       (user) => user.socketId !== socket.id
     );
+    SocketIO.inVidCallPairs.map((pair) => {
+      if (
+        pair.initiator.socketId === socket.id ||
+        pair.target.socketId === socket.id
+      ) {
+        SocketIO.inVidCallUsers = SocketIO.inVidCallUsers.filter(
+          (user) => user._id !== pair.initiator._id
+        );
+        SocketIO.inVidCallUsers = SocketIO.inVidCallUsers.filter(
+          (user) => user._id !== pair.target._id
+        );
+      }
+      if (pair.initiator.socketId === socket.id) {
+        socket.to(pair.target.socketId).emit(Events.leaveCallReceive, {
+          from: pair.initiator,
+          to: pair.target,
+          content: Date.now(),
+          isCloseTab: true,
+        });
+      } else if (pair.target.socketId === socket.id) {
+        socket.to(pair.initiator.socketId).emit(Events.leaveCallReceive, {
+          from: pair.target,
+          to: pair.initiator,
+          content: Date.now(),
+          isCloseTab: true,
+        });
+      }
+    });
+    SocketIO.inVidCallPairs = SocketIO.inVidCallPairs.filter((pair) => {
+      if (
+        pair.target.socketId === socket.id ||
+        pair.initiator.socketId === socket.id
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    });
     console.log(`${socket.id} is disconnect`.red);
     SocketIO.io.emit(Events.getOnlineUsers, SocketIO.onlineUsers);
     SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
@@ -169,8 +207,13 @@ SocketIO.io.on(Events.connection, (socket) => {
     let targetSocket = SocketIO.onlineUsers.find(
       (user) => user._id === signal.toUser._id
     );
+    let targetCallSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.ansUser._id
+    );
     SocketIO.addInVidCallUser(signal.toUser);
     SocketIO.addInVidCallUser(signal.ansUser);
+    SocketIO.addInVidCallPairs(targetSocket, targetCallSocket);
+
     SocketIO.inCallingUsers = SocketIO.inCallingUsers.filter(
       (user) => user._id !== signal.toUser._id
     );
@@ -208,6 +251,17 @@ SocketIO.io.on(Events.connection, (socket) => {
     SocketIO.inVidCallUsers = SocketIO.inVidCallUsers.filter(
       (user) => user._id !== signal.to._id
     );
+    SocketIO.inVidCallPairs = SocketIO.inVidCallPairs.filter((pair) => {
+      if (
+        pair.target._id === signal.from._id ||
+        pair.initiator._id === signal.from._id
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+    console.log(SocketIO.inVidCallPairs);
     let targetSocket = SocketIO.onlineUsers.find(
       (user) => user._id === signal.to._id
     );
@@ -216,6 +270,18 @@ SocketIO.io.on(Events.connection, (socket) => {
     }
     SocketIO.io.emit(Events.getInVidCallUsers, SocketIO.inVidCallUsers);
     SocketIO.io.emit(Events.getInCallingUsers, SocketIO.inCallingUsers);
+  });
+
+  //call leave unexpected
+  socket.on(Events.callLeaveUnexpected, (signal) => {
+    let targetSocket = SocketIO.onlineUsers.find(
+      (user) => user._id === signal.user._id
+    );
+    if (targetSocket) {
+      socket
+        .to(targetSocket.socketId)
+        .emit(Events.callLeaveUnexpectedReceive, signal);
+    }
   });
 });
 

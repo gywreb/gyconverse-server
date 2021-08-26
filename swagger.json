@@ -20,6 +20,10 @@
   },
   "tags": [
     {
+      "name": "File",
+      "description": "File authentication"
+    },
+    {
       "name": "Auth",
       "description": "User authentication"
     },
@@ -37,6 +41,31 @@
     }
   ],
   "paths": {
+    "/file": {
+      "get": {
+        "tags": ["File"],
+        "summary": "get file data",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "description": "name of the file",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/auth/register": {
       "post": {
         "tags": ["Auth"],
@@ -144,6 +173,38 @@
       "patch": {
         "tags": ["User"],
         "summary": "make freind by id with current auth user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "user ObjectId from mongodb",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/OK"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/user/sendFriendRequest/{userId}": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "send friend request with current auth user",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {

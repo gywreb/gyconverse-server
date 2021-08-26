@@ -6,6 +6,7 @@ class SocketIO {
   static singleRooms = [];
   static inCallingUsers = [];
   static inVidCallUsers = [];
+  static inVidCallPairs = [];
 
   static async init(server) {
     SocketIO.io = socketio(server, {
@@ -30,6 +31,30 @@ class SocketIO {
 
   static addSingleRoom(room) {
     SocketIO.singleRooms.push(room);
+  }
+
+  static addInVidCallPairs(initiator, target) {
+    if (SocketIO.inVidCallPairs.length) {
+      let inVidCallPairsId = SocketIO.inVidCallPairs.map(
+        (pair) => `${pair.initiator._id}-${pair.target._id}`
+      );
+      if (
+        inVidCallPairsId.includes(`${initiator._id}-${target._id}`) ||
+        inVidCallPairsId.includes(`${target._id}-${initiator._id}`)
+      ) {
+        return;
+      } else {
+        SocketIO.inVidCallPairs.push({
+          initiator,
+          target,
+        });
+      }
+    } else {
+      SocketIO.inVidCallPairs.push({
+        initiator,
+        target,
+      });
+    }
   }
 
   static addInCallingUser(user) {

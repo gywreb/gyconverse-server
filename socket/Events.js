@@ -27,4 +27,6 @@ module.exports = {
   getInCallingUsers: "getInCallingUsers",
   getInVidCallUsers: "getInVidCallUsers",
   logout: "logout",
+  callLeaveUnexpected: "callLeaveUnexpected",
+  callLeaveUnexpectedReceive: "callLeaveUnexpectedReceive",
 };
